@@ -140,8 +140,24 @@ def zip_dir(src, dest, arc_root):
                 z.write(p, os.path.join(arc_root, os.path.relpath(p, src)))
 
 
+def check_skill_frontmatter():
+    """The SKILL.md header must parse on every platform. An unquoted value containing ': '
+    is invalid YAML (it shipped once, 2026-10-15), and Claude shows only the first 500
+    characters of a description, so the part that says when to use the skill must fit."""
+    head = open(os.path.join(SKILL, "SKILL.md"), encoding="utf-8").read().split("---")[1]
+    m = re.search(r"^description: (.*)$", head, re.M)
+    if not m:
+        sys.exit("SKILL.md: no single-line description")
+    desc = m.group(1)
+    if not desc.startswith(("'", '"')) and (": " in desc or " #" in desc):
+        sys.exit("SKILL.md: unquoted description contains ': ' or ' #' (invalid YAML)")
+    if len(desc) > 500:
+        sys.exit(f"SKILL.md: description is {len(desc)} characters; keep it within 500")
+
+
 def main(argv):
     copy_to = argv[argv.index("--copy-to") + 1] if "--copy-to" in argv else None
+    check_skill_frontmatter()
     if len(DESCRIPTION) > DESCRIPTION_CAP:
         sys.exit(f"description is {len(DESCRIPTION)} characters; the cap is {DESCRIPTION_CAP}")
     if os.path.isdir(DIST):
