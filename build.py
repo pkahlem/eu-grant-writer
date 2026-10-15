@@ -37,14 +37,21 @@ INSTRUCTIONS_CAP = 8000
 DESCRIPTION_CAP = 300
 
 PACKS = {
-    "gemini": dict(via="gem", product="Gemini app (Gem)", setup="""\
-1. In the Gemini web app (gemini.google.com), open Gems and create a new Gem.
-2. Name: EU Grant Writer by SNM. Paste instructions.txt into the Instructions field.
-3. Under Knowledge, upload the five files in knowledge/.
-4. Save. To share it: Share, then Viewer access for a person, a group, or anyone with the
-   link. The recipient's Workspace administrator decides whether Gems shared from outside
-   the institution can be opened. Viewers can read the instructions and the files; all of
-   it is public material.
+    # Google is replacing Gems with skills: personal accounts from November 2026, Workspace
+    # business accounts March 2027, education June 2027. Personal accounts import the Agent
+    # Skill instead; this pack serves Workspace accounts until their Gems end.
+    "gemini": dict(via="gem", product="Gemini app (Gem), for Google Workspace accounts", setup="""\
+Personal Google accounts: use the skill itself instead. Download eu-grant-writer.zip from
+whetmark.com/skill and unzip it, then in
+Gemini open Customize > Skills, choose Upload (inside the Create menu if there is no
+separate button) and select the eu-grant-writer folder.
+
+Google Workspace accounts (universities, companies), where Gems keep working until 2027:
+1. On gemini.google.com, signed in with the institutional account, open the sidebar,
+   then Gems, then New Gem.
+2. Name: EU Grant Writer by SNM. Paste all of instructions.txt into the instructions box.
+3. Under Knowledge, choose Add files > Upload files and add the five files in knowledge/.
+4. Save. The institution's administrator decides whether Gems can be created and shared.
 """),
     # A ChatGPT Project, not a custom GPT: since August 2026 personal accounts cannot create
     # GPTs, and OpenAI is retiring custom GPTs. Projects work on every plan, Free included,
@@ -55,8 +62,8 @@ uploading eu-grant-writer.zip under Skills is the simpler route.
 
 1. In ChatGPT, create a new Project (Projects, in the sidebar) and name it
    EU Grant Writer by SNM.
-2. Open the project's settings and paste the whole of instructions.txt into its
-   Instructions.
+2. In the project, open the ••• menu > Project settings and paste the whole of
+   instructions.txt as the project instructions.
 3. Add the five files in knowledge/ to the project's files. The Free plan allows five
    files per project, exactly these five.
 4. Start every grant-writing chat inside this project.
@@ -66,21 +73,27 @@ file as well (plans with more than five files per project) and write in the box:
 "Follow instructions.txt in this project's files."
 """),
     "copilot": dict(via="copilot", product="Microsoft 365 Copilot (agent)", setup="""\
-1. In Microsoft 365 Copilot, create an agent (Agent Builder).
-2. Name: EU Grant Writer by SNM. Paste instructions.txt into Instructions.
-3. Add the five files in knowledge/ as knowledge.
-4. Share it within the organisation as its policy allows.
+For work and school Microsoft 365 accounts.
+1. In Microsoft Copilot (copilot.cloud.microsoft or Teams), choose New agent, then
+   Skip to configure.
+2. Name: EU Grant Writer by SNM. Description: see below. Paste all of instructions.txt
+   into Instructions.
+3. Under Knowledge, upload the five files in knowledge/ and wait until they are no longer
+   greyed out. Uploading files needs a Microsoft 365 Copilot licence; with the free
+   Copilot Chat alone, skip this step and the agent works from the instructions only.
+4. Add the starter prompts below (each needs a short title), select Create, then Share
+   as the institution allows.
 """),
 }
 
 DESCRIPTION = ("The method of The EU Grant Writer's AI Playbook for EU research proposals: go/no-go, "
                "call decoding, impact, work packages, budget narrative, mock evaluator review. "
                "Informed by 70+ real EU evaluation reports. Free, by Scientific Network Management.")
-STARTERS = [
-    "Should we apply to this call? Here is the topic text and our idea.",
-    "Decode this call template: what do we need, and from whom?",
-    "Review my Excellence section the way a strict evaluator would.",
-    "Build a backplan from our deadline.",
+STARTERS = [   # (short title, prompt): Copilot asks for a title per starter
+    ("Go or no-go", "Should we apply to this call? Here is the topic text and our idea."),
+    ("Decode the template", "Decode this call template: what do we need, and from whom?"),
+    ("Mock evaluator review", "Review my Excellence section the way a strict evaluator would."),
+    ("Backplan", "Build a backplan from our deadline."),
 ]
 
 
@@ -162,7 +175,7 @@ def main(argv):
             setup += f"\nDescription:\n{DESCRIPTION}\n\nConversation starters:\n"
         else:
             setup += "\nGood first prompts:\n"
-        setup += "".join(f"- {s}\n" for s in STARTERS)
+        setup += "".join(f"- {title}: {prompt}\n" for title, prompt in STARTERS)
         open(os.path.join(out, "SETUP.txt"), "w", encoding="utf-8").write(setup)
         check_pack(out)
         zip_dir(out, os.path.join(DIST, f"eu-grant-writer-{name}.zip"), f"eu-grant-writer-{name}")
