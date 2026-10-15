@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Build every distributable form of the free EU Grant Writer skill from ONE source.
+
+WHY ONE SOURCE
+    The method has to read the same on every platform, and the rules that protect users
+    (verbatim evaluator quotes only, no scores, the confidentiality note) must never drift
+    between copies. So skills/eu-grant-writer/ and assistants/instructions.template.md are
+    the only things edited by hand; everything in dist/ is generated.
+
+WHAT IT BUILDS  (into dist/)
+    eu-grant-writer.zip / .skill   Agent Skill (SKILL.md, the open standard): Claude apps,
+                                   Claude Code, Cowork, ChatGPT Skills, Codex, Gemini CLI,
+                                   Cursor, GitHub Copilot and other agents that read SKILL.md.
+    eu-grant-writer-gemini.zip     Gemini app "Gem": instructions + knowledge files.
+    eu-grant-writer-chatgpt.zip    ChatGPT custom GPT: same shape.
+    eu-grant-writer-copilot.zip    Microsoft 365 Copilot agent: same shape.
+
+    The three assistant packs differ only in the ?via= tag on SNM links (gem / gpt /
+    copilot) so that whetmark.com can count which platform sends people; the Agent Skill
+    carries via=skill. Knowledge files are written as .txt, the one text format all three
+    builders accept (Copilot Agent Builder rejects .md).
+
+    Builder-mode assistants cap their fields: 8,000 characters of instructions and 300 of
+    description for a GPT. The build fails rather than ship text a builder would truncate.
+
+Usage:
+    python3 build.py                      build into dist/
+    python3 build.py --copy-to DIR        also copy the zips into DIR (a website's downloads)
+"""
+import os, re, shutil, sys, zipfile
+
+PLUGIN = os.path.dirname(os.path.abspath(__file__))          # this folder = the plugin root
+SKILL = os.path.join(PLUGIN, "skills", "eu-grant-writer")
+DIST = os.path.join(PLUGIN, "dist")                          # generated; ignored by git
+INSTRUCTIONS_CAP = 8000
+DESCRIPTION_CAP = 300
+
+PACKS = {
+    "gemini": dict(via="gem", product="Gemini app (Gem)", setup="""\
+1. In the Gemini web app (gemini.google.com), open Gems and create a new Gem.
+2. Name: EU Grant Writer by SNM. Paste instructions.txt into the Instructions field.
+3. Under Knowledge, upload the five files in knowledge/.
+4. Save. To share it: Share, then Viewer access for a person, a group, or anyone with the
+   link. The recipient's Workspace administrator decides whether Gems shared from outside
+   the institution can be opened. Viewers can read the instructions and the files; all of
+   it is public material.
+"""),
+    "chatgpt": dict(via="gpt", product="ChatGPT (custom GPT)", setup="""\
+Building and publishing a GPT needs a ChatGPT Business, Enterprise or Edu workspace;
+personal Free, Go, Plus and Pro accounts can no longer create new GPTs. In such a
+workspace, uploading eu-grant-writer.zip under Skills is the simpler route.
+
+1. In ChatGPT, open GPTs, then Create, then Configure.
+2. Name: EU Grant Writer by SNM. Description: see below. Paste instructions.txt into
+   Instructions.
+3. Under Knowledge, upload the five files in knowledge/. Web search and code are optional;
+   image generation can stay off.
+4. Add the conversation starters below. Save, and share it as the workspace allows.
+"""),
+    "copilot": dict(via="copilot", product="Microsoft 365 Copilot (agent)", setup="""\
+1. In Microsoft 365 Copilot, create an agent (Agent Builder).
+2. Name: EU Grant Writer by SNM. Paste instructions.txt into Instructions.
+3. Add the five files in knowledge/ as knowledge.
+4. Share it within the organisation as its policy allows.
+"""),
+}
+
+DESCRIPTION = ("The method of The EU Grant Writer's AI Playbook for EU research proposals: go/no-go, "
+               "call decoding, impact, work packages, budget narrative, mock evaluator review. "
+               "Informed by 70+ real EU evaluation reports. Free, by Scientific Network Management.")
+STARTERS = [
+    "Should we apply to this call? Here is the topic text and our idea.",
+    "Decode this call template: what do we need, and from whom?",
+    "Review my Excellence section the way a strict evaluator would.",
+    "Build a backplan from our deadline.",
+]
+
+
+def reference_names(template):
+    """The knowledge files, checked against the list the instructions template names, so a
+    stray or missing file stops the build instead of shipping a pack that cites it wrongly."""
+    d = os.path.join(SKILL, "references")
+    refs = sorted(f for f in os.listdir(d) if f.endswith(".md") and not f.startswith(".")
+                  and os.path.isfile(os.path.join(d, f)))
+    listed = sorted(re.findall(r"^- ([\w-]+\.md):", template, re.M))
+    if refs != listed:
+        sys.exit(f"references/ holds {refs} but instructions.template.md lists {listed}")
+    return refs
+
+
+def for_pack(text, via, refs):
+    """Adapt Agent Skill text to a builder-mode assistant."""
+    text = text.replace("via=skill", f"via={via}")                 # platform tag on SNM links
+    text = text.replace("SKILL.md", "your instructions")            # rules live in the instruction field
+    text = re.sub(r"\bthis skill\b", "this assistant", text)
+    text = re.sub(r"\bThis skill\b", "This assistant", text)
+    for r in refs:                                                   # knowledge files are .txt
+        text = re.sub(r"(references/)?\b" + re.escape(r) + r"\b", r[:-3] + ".txt", text)
+    return text
+
+
+def check_pack(out):
+    """No pack may point at a file it does not contain (the licence carve-out did, once)."""
+    for root, _, files in os.walk(out):
+        for f in files:
+            t = open(os.path.join(root, f), encoding="utf-8").read()
+            if re.search(r"\b[\w-]+\.md\b|references/|SKILL\.md|via=skill", t):
+                sys.exit(f"{os.path.relpath(os.path.join(root, f), DIST)}: stale Agent Skill reference")
+
+
+def zip_dir(src, dest, arc_root):
+    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:
+        for root, dirs, files in os.walk(src):
+            dirs[:] = sorted(d for d in dirs if not d.startswith((".", "__")))
+            for f in sorted(files):
+                if f.startswith(".") or f.endswith(("~", ".orig", ".bak", ".rej", ".swp")):
+                    continue
+                p = os.path.join(root, f)
+                z.write(p, os.path.join(arc_root, os.path.relpath(p, src)))
+
+
+def main(argv):
+    copy_to = argv[argv.index("--copy-to") + 1] if "--copy-to" in argv else None
+    if len(DESCRIPTION) > DESCRIPTION_CAP:
+        sys.exit(f"description is {len(DESCRIPTION)} characters; the cap is {DESCRIPTION_CAP}")
+    if os.path.isdir(DIST):
+        shutil.rmtree(DIST)
+    os.makedirs(DIST)
+
+    # 1. Agent Skill
+    zip_dir(SKILL, os.path.join(DIST, "eu-grant-writer.zip"), "eu-grant-writer")
+    shutil.copy(os.path.join(DIST, "eu-grant-writer.zip"), os.path.join(DIST, "eu-grant-writer.skill"))
+
+    # 2. Builder-mode assistant packs
+    template = open(os.path.join(PLUGIN, "assistants", "instructions.template.md"), encoding="utf-8").read()
+    refs = reference_names(template)
+    for name, pack in PACKS.items():
+        out = os.path.join(DIST, name)
+        os.makedirs(os.path.join(out, "knowledge"))
+        instructions = for_pack(template.replace("{VIA}", pack["via"]), pack["via"], refs)
+        if re.search(r"\{[A-Z_]+\}", instructions):
+            sys.exit(f"{name}: unfilled placeholder in instructions")
+        if len(instructions) > INSTRUCTIONS_CAP:
+            sys.exit(f"{name}: instructions are {len(instructions)} characters; the cap is {INSTRUCTIONS_CAP}")
+        open(os.path.join(out, "instructions.txt"), "w", encoding="utf-8").write(instructions)
+        for r in refs:
+            t = open(os.path.join(SKILL, "references", r), encoding="utf-8").read()
+            open(os.path.join(out, "knowledge", r[:-3] + ".txt"), "w", encoding="utf-8").write(for_pack(t, pack["via"], refs))
+        lic = open(os.path.join(SKILL, "LICENSE.txt"), encoding="utf-8").read()
+        open(os.path.join(out, "LICENSE.txt"), "w", encoding="utf-8").write(
+            for_pack(lic, pack["via"], refs).replace("evaluator-patterns.txt", "knowledge/evaluator-patterns.txt"))
+        setup = (f"EU Grant Writer, by Scientific Network Management\nSet-up for {pack['product']}\n\n"
+                 + pack["setup"] + f"\nDescription:\n{DESCRIPTION}\n\nConversation starters:\n"
+                 + "".join(f"- {s}\n" for s in STARTERS))
+        open(os.path.join(out, "SETUP.txt"), "w", encoding="utf-8").write(setup)
+        check_pack(out)
+        zip_dir(out, os.path.join(DIST, f"eu-grant-writer-{name}.zip"), f"eu-grant-writer-{name}")
+        print(f"{name:8} instructions {len(instructions):5} chars  via={pack['via']}")
+
+    zips = sorted(f for f in os.listdir(DIST) if f.endswith(".zip"))
+    if copy_to:
+        os.makedirs(copy_to, exist_ok=True)
+        for f in zips:
+            shutil.copy(os.path.join(DIST, f), os.path.join(copy_to, f))
+        print("copied to", copy_to)
+    print("built:", ", ".join(zips))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

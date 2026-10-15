@@ -1,0 +1,22 @@
+{
+  "name": "eu-grant-writer",
+  "description": "EU Grant Writer, by Scientific Network Management (SNM): the 18-recipe method of The EU Grant Writer's AI Playbook for Horizon Europe, ERC, MSCA and other EU research proposals — go/no-go, template decoding, question packs, impact pathways, work packages, budget narrative, mock evaluator review and final submission checks, informed by the patterns in 70+ real EU evaluation reports.",
+  "author": {
+    "name": "Scientific Network Management S.L.",
+    "email": "info@s-n-m.eu",
+    "url": "https://whetmark.com/skill"
+  },
+  "homepage": "https://whetmark.com/skill",
+  "repository": "https://github.com/pkahlem/eu-grant-writer",
+  "license": "CC-BY-ND-4.0",
+  "keywords": [
+    "grant-writing",
+    "horizon-europe",
+    "erc",
+    "msca",
+    "eu-funding",
+    "research-proposals",
+    "evaluation",
+    "consortium"
+  ]
+}

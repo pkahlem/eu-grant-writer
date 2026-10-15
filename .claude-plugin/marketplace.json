@@ -1,0 +1,19 @@
+{
+  "name": "snm-grant-writing",
+  "description": "Grant-writing skills by Scientific Network Management (SNM).",
+  "owner": {
+    "name": "Scientific Network Management S.L.",
+    "email": "info@s-n-m.eu"
+  },
+  "plugins": [
+    {
+      "name": "eu-grant-writer",
+      "description": "The 18-recipe method of The EU Grant Writer's AI Playbook for EU research proposals, informed by the patterns in 70+ real EU evaluation reports.",
+      "source": "./",
+      "author": {
+        "name": "Scientific Network Management S.L.",
+        "email": "info@s-n-m.eu"
+      }
+    }
+  ]
+}

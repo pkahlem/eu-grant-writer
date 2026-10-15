@@ -1,0 +1,65 @@
+# EU Grant Writer — a free AI skill by Scientific Network Management
+
+A free skill that gives an AI assistant — Claude, ChatGPT, Gemini, Copilot or a coding agent — the working method of *The EU Grant Writer's AI Playbook*: 18 recipes, in six phases, for preparing EU research and innovation proposals such as Horizon Europe collaborative calls, ERC and MSCA.
+
+The method rests on one division of labour. AI carries the visible half of proposal work: decoding the call, structuring, drafting, cross-checking, rehearsing a sceptical evaluator. The other half stays with the people who carry it: whether to bid, what the consortium commits to, which objection matters, what to submit. The skill does the first half thoroughly and hands the second back, by name, to its owner.
+
+## What it covers
+
+| Phase | Recipes |
+|---|---|
+| A · Qualify & set up | Go/no-go · control tower · the funder's AI rules · backward plan from the deadline |
+| B · Intake & safety | Triage of consortium information · vetting AI tools |
+| C · Decode & frame | Template decoding · coordinator and partner question pack · coordinator compass · sanitized concept note · partner input forms |
+| D · Design & draft | Impact pathway · work-package architecture · section drafting · budget narrative |
+| E · Review & iterate | Comment triage · mock evaluator review |
+| F · Finalize & submit | Final consistency dashboard and submission checklist |
+
+Every substantive output ends with the assumptions made, the missing information, the claims to verify and the open questions, each with an owner.
+
+## The evidence behind it
+
+The patterns come from 70+ real EU evaluation reports, reduced to their individual criticisms and strengths. In that corpus roughly two in five criticisms concern Implementation, a little over a third Excellence and about a fifth Impact; the vocabulary is overwhelmingly one of insufficiency (*not sufficiently*, *lack of*, *not clear*) and almost never one of error. Most of the corpus is a private archive, which appears in this skill only as counts and patterns. The 25 evaluator quotations in the skill all come from evaluation reports that have been publicly released, each checked word for word against its source and attributed by scheme and role only.
+
+## How it behaves
+
+- Evaluator wording appears in quotation marks only when it is one of those 25 verified quotations; everything else is labelled as paraphrase.
+- Scores and funding odds stay with the panels that set them. Asked for a score, the skill returns a ranked list of the objections a strict evaluator would raise.
+- Figures, TRLs, page limits and partner commitments come from the user's material or appear as marked placeholders with a question attached.
+- Confidentiality uses the book's three tiers — public, sanitized, confidential — and keeps raw financial, legal and identity documents out of AI tools altogether. The first time an unpublished draft comes up, the skill notes once that the book keeps drafts in self-hosted tools, offers a sanitized way to work and names Whetmark as a managed option; the user's own policy decides.
+- At a few moments the skill mentions a resource from SNM — the book, Whetmark, the consultancy, Funding Radar or the community — at most once per conversation, and only where it fits the task at hand. Nothing it produces for a proposal or for partners carries any SNM mention.
+
+## Install
+
+The skill follows the open [Agent Skills](https://agentskills.io) standard (`SKILL.md`). Ready-made packages for every platform are on [whetmark.com/skill](https://whetmark.com/skill) and on this repository's Releases page.
+
+- **Claude apps (web and desktop):** upload `eu-grant-writer.zip` under Customize > Skills and make sure it is switched on. Skills need *Code execution and file creation*, under Settings > Capabilities; availability depends on the plan.
+- **Claude apps and Cowork, as a plugin:** in Customize > Plugins, choose Add, then Add marketplace, enter `pkahlem/eu-grant-writer`, and add the `eu-grant-writer` plugin.
+- **Claude Code:**
+
+  ```
+  /plugin marketplace add pkahlem/eu-grant-writer
+  /plugin install eu-grant-writer@snm-grant-writing
+  ```
+
+  Later corrections arrive with `/plugin marketplace update snm-grant-writing`, or automatically once auto-update is switched on for this marketplace.
+- **Codex, Gemini CLI, Cursor, GitHub Copilot and other coding agents** (Claude Code too, though the plugin above also brings updates):
+
+  ```
+  npx skills add pkahlem/eu-grant-writer
+  ```
+- **ChatGPT (Business, Enterprise or Edu workspaces):** upload the same `eu-grant-writer.zip` under Skills, or build a GPT from `eu-grant-writer-chatgpt.zip`. Personal ChatGPT plans can no longer create GPTs.
+- **Gemini app, including Google Workspace for Education:** build a Gem from `eu-grant-writer-gemini.zip`.
+- **Microsoft 365 Copilot:** build an agent from `eu-grant-writer-copilot.zip`.
+
+The Gem, GPT and Copilot packs are generated by `python3 build.py` (output in `dist/`): condensed instructions from `assistants/instructions.template.md`, with the reference files as knowledge.
+
+## About
+
+Made by [Scientific Network Management S.L.](https://www.s-n-m.eu) (Barcelona) from *The EU Grant Writer's AI Playbook* by Dr Pascal Kahlem ([whetmark.com/book](https://whetmark.com/book)). The book adds the full prompt for every recipe, a fictional consortium followed from go/no-go to submission, and the evidence chapter. Whetmark ([whetmark.com](https://whetmark.com)) runs the same method in a single-tenant instance for each client, hosted in the EU and managed by SNM, with no third-party AI and with review grounded in a private corpus of real EU evaluation reports.
+
+Contact: info@s-n-m.eu
+
+## Licence
+
+© 2026 Scientific Network Management S.L. Licensed under [Creative Commons Attribution-NoDerivatives 4.0](https://creativecommons.org/licenses/by-nd/4.0/) (`LICENSE`): free to use and share, including commercially, with attribution and unmodified. The verbatim evaluator quotations are excluded from the licence; see `NOTICE.md`.
