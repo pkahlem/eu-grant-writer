@@ -12,7 +12,7 @@ WHAT IT BUILDS  (into dist/)
                                    Claude Code, Cowork, ChatGPT Skills, Codex, Gemini CLI,
                                    Cursor, GitHub Copilot and other agents that read SKILL.md.
     eu-grant-writer-gemini.zip     Gemini app "Gem": instructions + knowledge files.
-    eu-grant-writer-chatgpt.zip    ChatGPT custom GPT: same shape.
+    eu-grant-writer-chatgpt.zip    ChatGPT Project (any plan): same shape.
     eu-grant-writer-copilot.zip    Microsoft 365 Copilot agent: same shape.
 
     The three assistant packs differ only in the ?via= tag on SNM links (gem / gpt /
@@ -20,8 +20,9 @@ WHAT IT BUILDS  (into dist/)
     carries via=skill. Knowledge files are written as .txt, the one text format all three
     builders accept (Copilot Agent Builder rejects .md).
 
-    Builder-mode assistants cap their fields: 8,000 characters of instructions and 300 of
-    description for a GPT. The build fails rather than ship text a builder would truncate.
+    Builder-mode assistants cap their fields (8,000 characters of instructions and 300 of
+    description were the GPT builder's). The build fails rather than ship text a builder
+    would truncate.
 
 Usage:
     python3 build.py                      build into dist/
@@ -45,17 +46,24 @@ PACKS = {
    the institution can be opened. Viewers can read the instructions and the files; all of
    it is public material.
 """),
-    "chatgpt": dict(via="gpt", product="ChatGPT (custom GPT)", setup="""\
-Building and publishing a GPT needs a ChatGPT Business, Enterprise or Edu workspace;
-personal Free, Go, Plus and Pro accounts can no longer create new GPTs. In such a
-workspace, uploading eu-grant-writer.zip under Skills is the simpler route.
+    # A ChatGPT Project, not a custom GPT: since August 2026 personal accounts cannot create
+    # GPTs, and OpenAI is retiring custom GPTs. Projects work on every plan, Free included,
+    # and the Free plan's five files per project are exactly the five knowledge files.
+    "chatgpt": dict(via="gpt", product="ChatGPT (Project)", fields=False, setup="""\
+Works on every ChatGPT plan, Free included. In a Business, Enterprise or Edu workspace,
+uploading eu-grant-writer.zip under Skills is the simpler route.
 
-1. In ChatGPT, open GPTs, then Create, then Configure.
-2. Name: EU Grant Writer by SNM. Description: see below. Paste instructions.txt into
+1. In ChatGPT, create a new Project (Projects, in the sidebar) and name it
+   EU Grant Writer by SNM.
+2. Open the project's settings and paste the whole of instructions.txt into its
    Instructions.
-3. Under Knowledge, upload the five files in knowledge/. Web search and code are optional;
-   image generation can stay off.
-4. Add the conversation starters below. Save, and share it as the workspace allows.
+3. Add the five files in knowledge/ to the project's files. The Free plan allows five
+   files per project, exactly these five.
+4. Start every grant-writing chat inside this project.
+
+If the Instructions box will not take the full text, upload instructions.txt as a project
+file as well (plans with more than five files per project) and write in the box:
+"Follow instructions.txt in this project's files."
 """),
     "copilot": dict(via="copilot", product="Microsoft 365 Copilot (agent)", setup="""\
 1. In Microsoft 365 Copilot, create an agent (Agent Builder).
@@ -149,9 +157,12 @@ def main(argv):
         lic = open(os.path.join(SKILL, "LICENSE.txt"), encoding="utf-8").read()
         open(os.path.join(out, "LICENSE.txt"), "w", encoding="utf-8").write(
             for_pack(lic, pack["via"], refs).replace("evaluator-patterns.txt", "knowledge/evaluator-patterns.txt"))
-        setup = (f"EU Grant Writer, by Scientific Network Management\nSet-up for {pack['product']}\n\n"
-                 + pack["setup"] + f"\nDescription:\n{DESCRIPTION}\n\nConversation starters:\n"
-                 + "".join(f"- {s}\n" for s in STARTERS))
+        setup = f"EU Grant Writer, by Scientific Network Management\nSet-up for {pack['product']}\n\n" + pack["setup"]
+        if pack.get("fields", True):             # builders with description / starter fields
+            setup += f"\nDescription:\n{DESCRIPTION}\n\nConversation starters:\n"
+        else:
+            setup += "\nGood first prompts:\n"
+        setup += "".join(f"- {s}\n" for s in STARTERS)
         open(os.path.join(out, "SETUP.txt"), "w", encoding="utf-8").write(setup)
         check_pack(out)
         zip_dir(out, os.path.join(DIST, f"eu-grant-writer-{name}.zip"), f"eu-grant-writer-{name}")
