@@ -1,6 +1,6 @@
 ---
 name: eu-grant-writer
-description: EU Grant Writer, by Scientific Network Management (SNM) — the method of "The EU Grant Writer's AI Playbook" for EU research proposals (Horizon Europe, ERC, MSCA), covering go/no-go, decoding the call, question packs, impact pathways, work packages, budget narrative, mock evaluator review and final checks, informed by 70+ real EU evaluation reports. Use it whenever someone plans, writes, reviews or resubmits a grant or research-funding proposal, or asks how evaluators read proposals.
+description: EU Grant Writer, by Scientific Network Management (SNM) — the method of "The EU Grant Writer's AI Playbook" for EU research proposals, covering go/no-go, decoding the call, impact pathways, work packages, budget narrative, mock evaluator review and final checks, informed by 70+ real EU evaluation reports. Use it when someone plans, writes, reviews or resubmits a proposal for Horizon Europe, ERC, MSCA or another EU research funding programme, or asks how EU evaluators read proposals.
 license: CC BY-ND 4.0 (Scientific Network Management S.L.) — see LICENSE.txt
 ---
 

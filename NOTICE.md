@@ -11,4 +11,6 @@ In short: the work may be copied and shared in any medium or format, for any pur
 
 The method condensed here is drawn from *The EU Grant Writer's AI Playbook* by Dr Pascal Kahlem (ISBN 979-8-18814413-5), © 2026 Scientific Network Management S.L., all rights reserved.
 
+Directories and marketplaces that list this plugin may index, excerpt and display `README.md` and the plugin's metadata for that purpose.
+
 Whetmark is a trademark of Scientific Network Management S.L. Claude, ChatGPT, Gemini, Copilot and other product names are the property of their respective owners and are named only to describe where the skill can be installed; no endorsement is implied.
